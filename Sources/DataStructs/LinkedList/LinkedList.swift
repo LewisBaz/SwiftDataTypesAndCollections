@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct LinkedList<Value> {
+public struct LinkedList<Value>: Equatable {
     public var head: Node<Value>?
     public var tail: Node<Value>?
     
@@ -30,6 +30,7 @@ public struct LinkedList<Value> {
     
     /// Time Complexity: O(1)
     public mutating func push(_ value: Value) {
+        copyNodes()
         head = .init(value: value, next: head)
         if tail == nil {
             tail = head
@@ -38,6 +39,7 @@ public struct LinkedList<Value> {
     
     /// Time Complexity: O(1)
     public mutating func push(_ node: Node<Value>) {
+        copyNodes()
         node.next = head
         head = node
         if tail == nil {
@@ -48,6 +50,7 @@ public struct LinkedList<Value> {
     /// Time Complexity: O(1)
     public mutating func append(_ value: Value) {
         guard !isEmpty else { push(value); return }
+        copyNodes()
         tail?.next = Node(value: value)
         tail = tail?.next
     }
@@ -55,6 +58,7 @@ public struct LinkedList<Value> {
     /// Time Complexity: O(1)
     public mutating func append(_ node: Node<Value>) {
         guard !isEmpty else { push(node); return }
+        copyNodes()
         tail?.next = node
         tail = tail?.next
     }
@@ -75,18 +79,26 @@ public struct LinkedList<Value> {
     /// Time Complexity: O(1)
     @discardableResult
     public mutating func insert(value: Value, after node: Node<Value>?) -> Node<Value>? {
-        guard let node else { return nil }
+        let node = copyNodes(withNode: node)
         guard tail != node else { append(value); return tail }
-        node.next = Node(value: value, next: node.next)
-        return node.next
+        node?.next = Node(value: value, next: node?.next)
+        if head == tail {
+            head?.next = node?.next
+            tail = node?.next
+        }
+        return node?.next
     }
     
     /// Time Complexity: O(1)
     public mutating func insert(node: Node<Value>, afterNode: Node<Value>?) {
-        guard let afterNode else { return }
+        let afterNode = copyNodes(withNode: afterNode)
         guard tail != afterNode else { append(node); return }
-        node.next = afterNode.next
-        afterNode.next = node
+        afterNode?.next = node
+        if head == tail {
+            head?.next = afterNode?.next
+            tail = afterNode?.next
+        }
+        afterNode?.next = node
     }
     
     // MARK: - Removing
@@ -94,6 +106,7 @@ public struct LinkedList<Value> {
     /// Time Complexity: O(1)
     @discardableResult
     public mutating func pop() -> Value? {
+        copyNodes()
         defer {
             head = head?.next
             if isEmpty {
@@ -106,6 +119,7 @@ public struct LinkedList<Value> {
     /// Time Complexity: O(n)
     @discardableResult
     public mutating func removeLast() -> Value? {
+        copyNodes()
         guard let head else { return nil }
         guard head.next != nil else { return pop() }
         
@@ -125,6 +139,7 @@ public struct LinkedList<Value> {
     /// Time Complexity: O(1)
     @discardableResult
     public mutating func remove(after node: Node<Value>?) -> Value? {
+        copyNodes()
         guard let node else { return nil }
         defer {
             if node.next === nil {
@@ -135,6 +150,81 @@ public struct LinkedList<Value> {
         return node.next?.value
     }
 }
+
+extension LinkedList: Collection {
+    
+    public struct Index: Comparable {
+        
+        public var node: Node<Value>?
+        
+        public static func < (lhs: LinkedList<Value>.Index, rhs: LinkedList<Value>.Index) -> Bool {
+            guard lhs != rhs else { return false }
+            let nodes = sequence(first: lhs.node) { $0?.next }
+            return nodes.contains(where: { $0 === rhs.node })
+        }
+    }
+    
+    public var startIndex: Index {
+        return .init(node: head)
+    }
+    
+    public var endIndex: Index {
+        return .init(node: tail)
+    }
+    
+    public func index(after i: Index) -> Index {
+        return .init(node: i.node?.next)
+    }
+
+    public subscript(position: Index) -> Value {
+        return position.node!.value
+    }
+}
+
+// MARK: - Private Methods
+
+private extension LinkedList {
+    
+    mutating func copyNodes() {
+        guard !isKnownUniquelyReferenced(&head) else { return }
+        guard var oldNode = head else { return }
+        head = Node(value: oldNode.value)
+        var newNode = head
+        
+        while let nextOldNode = oldNode.next {
+            newNode?.next = Node(value: nextOldNode.value)
+            newNode = newNode?.next
+            oldNode = nextOldNode
+        }
+        tail = newNode
+    }
+    
+    mutating func copyNodes(withNode: Node<Value>?) -> Node<Value>? {
+        guard !isKnownUniquelyReferenced(&head) else { return withNode }
+        guard var oldNode = head else { return nil }
+        head = Node(value: oldNode.value)
+        var newNode = head
+        
+        var nodeToReturn: Node<Value>?
+        
+        if let withNode {
+            nodeToReturn = .init(value: withNode.value)
+        }
+        
+        while let nextOldNode = oldNode.next {
+            newNode?.next = Node(value: nextOldNode.value)
+            if withNode == oldNode {
+                nodeToReturn = newNode
+            }
+            newNode = newNode?.next
+            oldNode = nextOldNode
+        }
+        tail = newNode
+        return nodeToReturn
+    }
+}
+
+// MARK: - CustomStringConvertible
 
 extension LinkedList: CustomStringConvertible {
     
