@@ -25,15 +25,18 @@ public struct Stack<Element> {
         storage.isEmpty
     }
     
+    /// Time Complexity: O(1)
     public mutating func push(_ element: Element) {
         storage.append(element)
     }
     
+    /// Time Complexity: O(1)
     @discardableResult
     public mutating func pop() -> Element? {
         storage.popLast()
     }
     
+    /// Time Complexity: O(1)
     public func peek() -> Element? {
         storage.last
     }
