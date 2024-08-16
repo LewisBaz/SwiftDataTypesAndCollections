@@ -41,7 +41,8 @@ public struct DoubleLinkedList<Value: Equatable> {
         tail = tail?.next
     }
     
-    public mutating func remove(_ node: DoubleNode<Value>?) {
+    @discardableResult
+    public mutating func remove(_ node: DoubleNode<Value>?) -> Value? {
         var currentNode = head
         
         if head == node {
@@ -57,10 +58,12 @@ public struct DoubleLinkedList<Value: Equatable> {
                 let next = currentNode?.next
                 prev?.next = next
                 next?.prev = prev
-                return
+                return currentNode?.value
             }
             currentNode = currentNode?.next
         }
+        
+        return nil
     }
 }
 
@@ -79,5 +82,13 @@ private extension DoubleLinkedList {
     mutating func removeTail() {
         tail?.prev?.next = nil
         tail = tail?.prev
+    }
+}
+
+extension DoubleLinkedList: CustomStringConvertible {
+    
+    public var description: String {
+        guard let head = head, let tail = tail else { return "Empty list" }
+        return String(describing: "head: \(head.value); tail: \(tail.value)")
     }
 }
