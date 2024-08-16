@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  LinkedList.swift
+//
 //
 //  Created by Lewis on 08.08.2024.
 //
