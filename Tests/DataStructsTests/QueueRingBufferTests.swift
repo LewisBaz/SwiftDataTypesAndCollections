@@ -15,8 +15,8 @@ final class QueueRingBufferTests: XCTestCase {
         ringBuffer.enqueue(5)
         ringBuffer.enqueue(6)
         ringBuffer.enqueue(7)
-        var result1 = ringBuffer.enqueue(8)
-        var result2 = ringBuffer.enqueue(1)
+        let result1 = ringBuffer.enqueue(8)
+        let result2 = ringBuffer.enqueue(1)
         
         XCTAssertTrue(result1 == true)
         XCTAssertTrue(result2 == false)
