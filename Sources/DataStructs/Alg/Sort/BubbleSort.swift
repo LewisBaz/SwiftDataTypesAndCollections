@@ -31,4 +31,15 @@ class BubbleSort {
             }
         }
     }
+    
+    func bubbleSortExtra<Element>(_ collection: inout [Element]) where Element: Comparable {
+        guard collection.count > 2 else { return }
+        for i in 1..<collection.count {
+            for j in 0...i {
+                if collection[j] >= collection[i] {
+                    collection.swapAt(i, j)
+                }
+            }
+        }
+    }
 }

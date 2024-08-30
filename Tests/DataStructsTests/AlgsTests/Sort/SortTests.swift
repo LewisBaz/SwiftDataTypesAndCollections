@@ -25,4 +25,12 @@ final class SortTests: XCTestCase {
         XCTAssertEqual(collection.first, 0)
         XCTAssertEqual(collection.last, 6)
     }
+    
+    func testInsertionSort() {
+        var collection: [Int] = [1,4,6,2,3,5,2,1,5,0,4,2,6]
+        InsertionSort().insertionSort(&collection)
+        print(collection)
+        XCTAssertEqual(collection.first, 0)
+        XCTAssertEqual(collection.last, 6)
+    }
 }
