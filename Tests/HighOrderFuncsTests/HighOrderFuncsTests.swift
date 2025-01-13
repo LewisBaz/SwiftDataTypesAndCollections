@@ -20,4 +20,15 @@ final class HighOrderFuncsTests: XCTestCase {
         let dict = [1:1, 2:2, 3:3].filterToNewDictionary { e in e.key == 3 }
         XCTAssertTrue(dict == [3:3])
     }
+    
+    func testMap() {
+        let array = ["123", "456"].customMap { e in
+            return Int(e)!
+        }
+        XCTAssertTrue(array == [123, 456])
+        
+        let testable2: [Int?] = [12, nil, 56]
+        let array2 = testable2.customCompactMap { $0 }
+        XCTAssertTrue(array2 == [12, 56])
+    }
 }
