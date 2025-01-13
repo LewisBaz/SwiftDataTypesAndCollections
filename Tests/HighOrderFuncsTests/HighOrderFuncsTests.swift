@@ -39,4 +39,10 @@ final class HighOrderFuncsTests: XCTestCase {
         }
         XCTAssertTrue(val == 15)
     }
+    
+    func testCountWhere() {
+        let array = [1,2,3,4,5]
+        let count = array.countWhere(action: { $0 % 2 == 0 })
+        XCTAssertTrue(count == 2)
+    }
 }
