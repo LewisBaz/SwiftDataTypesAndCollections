@@ -31,4 +31,12 @@ final class HighOrderFuncsTests: XCTestCase {
         let array2 = testable2.customCompactMap { $0 }
         XCTAssertTrue(array2 == [12, 56])
     }
+    
+    func testReduce() {
+        let array = [1,2,3,4,5]
+        let val = array.customReduce(0) { val, next in
+            val + next
+        }
+        XCTAssertTrue(val == 15)
+    }
 }
