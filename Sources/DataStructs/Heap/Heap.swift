@@ -1,126 +1,67 @@
 //
 //  Heap.swift
+//  DataStructs
 //
-//
-//  Created by Lewis on 26.08.2024.
+//  Created by Lewis on 22.07.2026.
 //
 
-import Foundation
-
-public struct Heap<Element: Equatable> {
+public struct Heap<Element> {
     
-    public var elements: [Element] = []
-    public let sort: (Element, Element) -> Bool
+    private var storage: [Element] = []
+    let isHigherPriority: (Element, Element) -> Bool
     
-    public init(sort: @escaping (Element, Element) -> Bool, elements: [Element] = []) {
-        self.sort = sort
-        self.elements = elements
-        if !elements.isEmpty {
-            for i in stride(from: elements.count / 2 - 1, through: 0, by: -1) {
-                siftDown(from: i)
-            }
+    public init(isHigherPriority: @escaping (Element, Element) -> Bool) {
+        self.isHigherPriority = isHigherPriority
+    }
+    
+    private func parentIndex(of index: Int) -> Int { (index - 1) / 2 }
+    private func leftChildIndex(of index: Int) -> Int { 2 * index + 1 }
+    private func rightChildIndex(of index: Int) -> Int { 2 * index + 2 }
+    
+    // O(log n)
+    private mutating func siftUp(from index: Int) {
+        var child = index
+        var parent = parentIndex(of: index)
+        while child > 0, isHigherPriority(storage[child], storage[parent]) {
+            storage.swapAt(child, parent)
+            child = parent
+            parent = parentIndex(of: child)
         }
     }
     
-    public var isEmpty: Bool {
-        return elements.isEmpty
-    }
-    
-    public var count: Int {
-        return elements.count
-    }
-    
-    public func peek() -> Element? {
-        return elements.first
-    }
-    
-    public func leftChildIndex(ofParentAt index: Int) -> Int {
-        return (2 * index) + 1
-    }
-    
-    public func rightChildIndex(ofParentAt index: Int) -> Int {
-        return (2 * index) + 2
-    }
-    
-    public func parentIndex(ofChildAt index: Int) -> Int {
-        return (index - 1) / 2
-    }
-    
-    public mutating func remove() -> Element? {
-        guard !isEmpty else { return nil }
-        elements.swapAt(0, count - 1)
-        defer {
-            siftDown(from: 0)
-        }
-        return elements.removeLast()
-    }
-    
-    /// Time Complexity: O(log n)
+    // O(log n)
     private mutating func siftDown(from index: Int) {
         var parent = index
         while true {
-            let left = leftChildIndex(ofParentAt: parent)
-            let right = rightChildIndex(ofParentAt: parent)
+            let left = leftChildIndex(of: parent)
+            let right = rightChildIndex(of: parent)
             var candidate = parent
-            if left < count && sort(elements[left], elements[candidate]) {
+            
+            if left < storage.count, isHigherPriority(storage[left], storage[candidate]) {
                 candidate = left
             }
-            if right < count && sort(elements[right], elements[candidate]) {
+            if right < storage.count, isHigherPriority(storage[right], storage[candidate]) {
                 candidate = right
             }
-            if parent == candidate {
-                return
-            }
-            elements.swapAt(parent, candidate)
+            
+            guard candidate != parent else { return }
+            storage.swapAt(candidate, parent)
             parent = candidate
         }
     }
     
     public mutating func insert(_ element: Element) {
-        elements.append(element)
-        siftUp(from: elements.count - 1)
+        storage.append(element)
+        siftUp(from: storage.count - 1)
     }
     
-    private mutating func siftUp(from index: Int) {
-        var child = index
-        var parent = parentIndex(ofChildAt: child)
-        while child > 0 && sort(elements[child], elements[parent]) {
-            elements.swapAt(child, parent)
-            child = parent
-            parent = parentIndex(ofChildAt: child)
+    public mutating func extract() -> Element? {
+        guard !storage.isEmpty else { return nil }
+        storage.swapAt(0, storage.count - 1)
+        let removed = storage.removeLast()
+        if !storage.isEmpty {
+            siftDown(from: 0)
         }
-    }
-    
-    public mutating func remove(at index: Int) -> Element? {
-        guard index < elements.count else { return nil }
-        if index == elements.count - 1 {
-            return elements.removeLast()
-        } else {
-            elements.swapAt(index, elements.count - 1)
-            defer {
-                siftDown(from: index)
-                siftUp(from: index)
-            }
-            return elements.removeLast()
-        }
-    }
-    
-    public func index(of element: Element, startingAt i: Int) -> Int? {
-        if i >= count {
-            return nil
-        }
-        if sort(element, elements[i]) {
-            return nil
-        }
-        if element == elements[i] {
-            return i
-        }
-        if let j = index(of: element, startingAt: leftChildIndex(ofParentAt: i)) {
-            return j
-        }
-        if let j = index(of: element, startingAt: rightChildIndex(ofParentAt: i)) {
-            return j
-        }
-        return nil
+        return removed
     }
 }
